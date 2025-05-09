@@ -1,0 +1,1 @@
+App simples em HTML, CSS e JavaScript para registrar o consumo diário de água. Os dados são salvos no navegador e exibidos em um gráfico. Funciona direto no navegador, sem precisar instalar nada. Ideal para acompanhar o uso ao longo do tempo.
