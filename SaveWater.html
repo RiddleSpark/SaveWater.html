@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>SaveWater</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 30px;
+      max-width: 600px;
+      margin: auto;
+      background: #f0f8ff;
+    }
+    h1 {
+      color: #0077b6;
+    }
+    input, button {
+      padding: 10px;
+      margin: 10px 0;
+      width: 100%;
+      font-size: 16px;
+    }
+    canvas {
+      margin-top: 30px;
+      background: white;
+      border: 1px solid #ccc;
+      padding: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h1>💧 SaveWater</h1>
+
+  <label for="consumo">Consumo diário (em litros):</label>
+  <input type="number" id="consumo" placeholder="Ex: 150" min="0">
+  <button onclick="registrarConsumo()">Registrar</button>
+
+  <canvas id="grafico" width="400" height="200"></canvas>
+
+  <script>
+    const consumoInput = document.getElementById('consumo');
+    const graficoEl = document.getElementById('grafico');
+    let chart;
+
+    function carregarDados() {
+      const dados = localStorage.getItem('consumoAgua');
+      return dados ? JSON.parse(dados) : [];
+    }
+
+    function salvarDados(dados) {
+      localStorage.setItem('consumoAgua', JSON.stringify(dados));
+    }
+
+    function registrarConsumo() {
+      const litros = parseFloat(consumoInput.value);
+      if (isNaN(litros) || litros <= 0) {
+        alert("Digite um valor válido.");
+        return;
+      }
+
+      const hoje = new Date().toISOString().split('T')[0];
+      let dados = carregarDados();
+      dados.push({ data: hoje, litros });
+      salvarDados(dados);
+      consumoInput.value = '';
+      atualizarGrafico();
+    }
+
+    function agruparConsumo(dados) {
+      const agrupado = {};
+      for (let entrada of dados) {
+        agrupado[entrada.data] = (agrupado[entrada.data] || 0) + entrada.litros;
+      }
+      return agrupado;
+    }
+
+    function atualizarGrafico() {
+      const dados = carregarDados();
+      const agrupado = agruparConsumo(dados);
+      const labels = Object.keys(agrupado);
+      const valores = Object.values(agrupado);
+
+      if (chart) chart.destroy();
+      chart = new Chart(graficoEl, {
+        type: 'line',
+        data: {
+          labels,
+          datasets: [{
+            label: 'Consumo de Água (litros)',
+            data: valores,
+            borderColor: '#0077b6',
+            backgroundColor: 'rgba(0, 119, 182, 0.1)',
+            fill: true,
+            tension: 0.3,
+            pointRadius: 5
+          }]
+        },
+        options: {
+          scales: {
+            y: { beginAtZero: true }
+          }
+        }
+      });
+    }
+
+    atualizarGrafico();
+  </script>
+</body>
+</html>
